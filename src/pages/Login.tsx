@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebase';
+import { FirebaseError } from 'firebase/app';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../firebase';
+import type { UserRole } from '../types';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -18,14 +21,40 @@ export function Login() {
     setCarregando(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, senha);
+      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+      const user = userCredential.user;
       
-      console.log('Login efetuado com sucesso!');
-      navigate('/monitor');
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const role = userDocSnap.data().role as UserRole;
+        
+        console.log(`Login efetuado. Redirecionando para painel: ${role}`);
+        
+        if (role === 'coordenacao') {
+          navigate('/coordenacao');
+        } else if (role === 'monitor') {
+          navigate('/monitor');
+        } else {
+           setErro('Perfil de usuário inválido.');
+           await auth.signOut();
+        }
+      } else {
+        setErro('Usuário sem perfil configurado no banco de dados.');
+        await auth.signOut();
+      }
       
-    } catch (error) {
+   } catch (error) {
       console.error(error);
-      setErro('E-mail ou senha incorretos. Tente novamente.');
+      
+      const firebaseError = error as FirebaseError;
+
+      if (firebaseError.code === 'auth/invalid-credential') {
+        setErro('E-mail ou senha incorretos. Tente novamente.');
+      } else {
+        setErro('Erro ao fazer login. Verifique sua conexão.');
+      }
     } finally {
       setCarregando(false);
     }

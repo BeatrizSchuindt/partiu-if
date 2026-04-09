@@ -1,3 +1,11 @@
+export type UserRole = 'monitor' | 'coordenacao';
+
+export interface Usuario {
+  readonly uid: string;
+  readonly email: string;
+  readonly role: UserRole;
+}
+
 export interface Aluno {
   readonly id: string;
   readonly nome: string;

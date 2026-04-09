@@ -13,7 +13,7 @@ function App() {
         <Route 
           path="/monitor" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="monitor">
               <Monitor />
             </ProtectedRoute>
           } 
@@ -22,7 +22,7 @@ function App() {
         <Route 
           path="/coordenacao" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="coordenacao">
               <Coordenacao />
             </ProtectedRoute>
           } 
