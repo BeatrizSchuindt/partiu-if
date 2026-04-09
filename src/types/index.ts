@@ -10,7 +10,11 @@ export interface Turma {
   readonly alunos: Aluno[];
 }
 
-export interface Presenca {
-  readonly alunoId: string;
-  readonly status: 'P' | 'F'; // P = Presente, F = Falta
+export interface PresencaDoc {
+  readonly id: string;
+  readonly data: string;
+  readonly turmaId: string;
+  readonly chamada: '1' | '2' | '3';
+  readonly lista: Record<string, 'P' | 'F'>;
+  readonly atualizadoEm: string;
 }
